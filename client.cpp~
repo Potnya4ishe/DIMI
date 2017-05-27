@@ -186,13 +186,23 @@ double split_problem_and_solve(serv_st servers[MAX_NUMB_SERV], int current, doub
 
 
 int client_integrate(char* function, double a, double b) {
+
 	
-	// Создание UDP сокета -- отправляем широковещательный пакет и принимаем ответ	
+
+	socklen_t addr_len = sizeof(struct sockaddr_in);
+	int count = 0;
+	
+	// Создание UDP сокета -- отправляем широковещательный пакет и принимаем ответ
+	
 	//Создаем сокет для отправки-приёма broadcast. Порт ставим любой. Биндим его
 	int broad_sock = prepare_UDP_socket();
-		
+	
+	int int_true = 1;
+	
 	count = broad_cast(broad_sock);
-	if (count < 0) ERR_RETURN(ERR_SENDTO);	
+	if (count < 0) ERR_RETURN(ERR_SENDTO);
+	
+	
 
 	//Сюда будем писать адресса, с которых пришли ответы. Их надо запомнить
 	serv_st servers[MAX_NUMB_SERV];
@@ -200,8 +210,9 @@ int client_integrate(char* function, double a, double b) {
 
 	int current = collect_answers(servers, broad_sock);	
 
-
 	double total_result = split_problem_and_solve(servers, current, a, b, function);
+
+	
 	
 	if( !broken)
 		printf("The result is %lf\n", total_result);	
@@ -209,6 +220,8 @@ int client_integrate(char* function, double a, double b) {
 		printf("One server is broken! Terminated...\n");
 	return 0;	
 }
+
+
 
 
 

@@ -20,7 +20,7 @@ int main( int argc, char** argv )
 		printf("The server needs one argument -- the number of cores to use. Please enter it:\n");
 		scanf("%d", &procs);
 	}
-	procs = atoi(argv[1]);
+	int procs = atoi(argv[1]);
 
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 	socklen_t new_addr_len =0;
