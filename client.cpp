@@ -191,7 +191,7 @@ int client_integrate(char* function, double a, double b) {
 	//Создаем сокет для отправки-приёма broadcast. Порт ставим любой. Биндим его
 	int broad_sock = prepare_UDP_socket();
 		
-	count = broad_cast(broad_sock);
+	int count = broad_cast(broad_sock);
 	if (count < 0) ERR_RETURN(ERR_SENDTO);	
 
 	//Сюда будем писать адресса, с которых пришли ответы. Их надо запомнить
