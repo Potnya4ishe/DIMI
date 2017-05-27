@@ -33,23 +33,40 @@ void prepare_signals() {
 int main( int argc, char** argv )
 {
 	char exprBuf[64];
-	scanf("%s", exprBuf);
+	char result_string[64];
+ 	for(;;) {
+ 		sleep(5);
+		memset(exprBuf, 0, 64);
+		FILE* sourceCode = fopen("expr.txt", "r");
+		ASSERT(nullptr != sourceCode);
+		//scanf("%s", exprBuf);
+		fscanf(sourceCode, "%s", exprBuf);
+		ASSERT(EOF != fclose(sourceCode));
+		Interpreter interp;
+		ASTree* tree = interp.run(exprBuf);
+		ASTnode* root = (ASTnode*)tree->getRootNode();
 
-	Interpreter interp;
-	ASTree* tree = interp.run(exprBuf);
-	ASTnode* root = (ASTnode*)tree->getRootNode();
+		if (FUNCTION == root->getNodeType() && 
+			"int" == ((Function*)root)->getName()) {
+			double a = 0.0;
+			double b = 1.0;
+			std::string subTreeStr = toStringRecursive(((Function*)root)->getArgument());
+			const char* tmpCharStr = subTreeStr.c_str();
+			strcpy(exprBuf, tmpCharStr);
+			client_integrate(exprBuf, a, b);
+		}
 
-	if (FUNCTION == root->getNodeType() && 
-		"int" == ((Function*)root)->getName()) {
-		double a = 0.0;
-		double b = 1.0;
-		std::string subTreeStr = toStringRecursive(((Function*)root)->getArgument());
-		const char* tmpCharStr = subTreeStr.c_str();
-		strcpy(exprBuf, tmpCharStr);
-		client_integrate(exprBuf, a, b);
+		memset(result_string, 0, 64);
+		strcpy(result_string, toStringRecursive(root).c_str());
+
+		printf("%s\n", result_string);
+
+		FILE* outCode = fopen("res.txt", "w");
+		ASSERT(nullptr != outCode);
+		fprintf(outCode, "%s", result_string);
+		ASSERT(EOF != fclose(outCode));
 	}
 
-	printf("%s\n", root->toString().c_str());
 }
 
 	
