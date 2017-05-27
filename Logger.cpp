@@ -6,6 +6,7 @@ Logger::Logger(const char* name, const char* fileNameToDump /* = nullptr*/) : m_
 	if (fileNameToDump == nullptr) {
 		fileNameToDump = defaultFileToDump;
 	}
+	m_isLogEnable = true;
 	m_fileToDump = fopen(fileNameToDump, "w");
 	ASSERT((nullptr != m_fileToDump) && "Couldn't open file to log.");
 	fprintf(m_fileToDump, "%s %s\n", "Start logging by", m_name);
@@ -15,10 +16,12 @@ Logger::Logger(const char* name, const char* fileNameToDump /* = nullptr*/) : m_
 void Logger::log(const char* msg, LogLevel logLvl /* = LOG*/) {
 	ASSERT(nullptr != m_fileToDump);
 
-	/*if (!isLogPossible(logLvl)) {
+	if (!isLogPossible(logLvl)) {
 		return;
 	}
-
+	if (!m_isLogEnable) {
+		return;
+	}
 	time_t rawTime;
 	struct tm *timeInfo = nullptr;
 	time(&rawTime);
@@ -32,7 +35,7 @@ void Logger::log(const char* msg, LogLevel logLvl /* = LOG*/) {
 
 	if (WARNING == logLvl || ERROR == logLvl) {
 		fprintf(stdout, "%s: %s\n", logLevelToStr(logLvl), msg);
-	}*/
+	}
 }
 
 void Logger::log(const std::string &msg, LogLevel logLvl /* = LOG*/) {
@@ -42,6 +45,16 @@ void Logger::log(const std::string &msg, LogLevel logLvl /* = LOG*/) {
 void Logger::setLogLevel(LogLevel lvl) {
 	m_logLvl = lvl;
 }
+
+void Logger::enableLog() {
+	m_isLogEnable = true;
+}
+
+
+void Logger::disableLog() {
+	m_isLogEnable = false;
+}
+
 
 
 bool Logger::isLogPossible(LogLevel lvl) const {

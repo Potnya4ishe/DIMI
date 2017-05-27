@@ -20,7 +20,7 @@ int main( int argc, char** argv )
 		printf("The server needs one argument -- the number of cores to use. Please enter it:\n");
 		scanf("%d", &procs);
 	}
-	int procs = atoi(argv[1]);
+	procs = atoi(argv[1]);
 
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 	socklen_t new_addr_len =0;
@@ -46,7 +46,7 @@ int main( int argc, char** argv )
 	my_addr.sin_family = AF_INET;
 	int my_sock = socket( PF_INET, SOCK_STREAM, 0);
 	setsockopt(my_sock, SOL_SOCKET, SO_REUSEADDR, &count, sizeof(count));
-	//setsockopt(my_sock, SOL_SOCKET, SO_REUSEPORT, &count, sizeof(count));
+	setsockopt(my_sock, SOL_SOCKET, SO_REUSEPORT, &count, sizeof(count));
 	count = bind(my_sock, (struct sockaddr*) &my_addr, addr_len);
 	if(count < 0)
 		{
@@ -142,8 +142,9 @@ int main( int argc, char** argv )
 		close(client);
 		printf("Client is gone! Starting catching new broadcasting!\n");
 		semop(semid, &can_broad, 1);
-		iterations--;
+		//iterations--;
 	}
+	printf("The end!\n");
 	semctl(semid, 0, IPC_RMID);
 	close(my_sock);
 	return 0;	
@@ -261,7 +262,7 @@ void* broad_thread_func(void* arg)
 		
 	semoper broading = { 0, -1, 0};
 	int iterations = 2;
-	while( iterations>0 )
+	while( iterations > 0 )
 	{
 		printf("Trying to start catching broadcasts...\n");
 		semop(semid,&broading,1);

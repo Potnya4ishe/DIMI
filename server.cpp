@@ -46,7 +46,7 @@ int main( int argc, char** argv )
 	my_addr.sin_family = AF_INET;
 	int my_sock = socket( PF_INET, SOCK_STREAM, 0);
 	setsockopt(my_sock, SOL_SOCKET, SO_REUSEADDR, &count, sizeof(count));
-	//setsockopt(my_sock, SOL_SOCKET, SO_REUSEPORT, &count, sizeof(count));
+	setsockopt(my_sock, SOL_SOCKET, SO_REUSEPORT, &count, sizeof(count));
 	count = bind(my_sock, (struct sockaddr*) &my_addr, addr_len);
 	if(count < 0)
 		{
@@ -142,7 +142,7 @@ int main( int argc, char** argv )
 		close(client);
 		printf("Client is gone! Starting catching new broadcasting!\n");
 		semop(semid, &can_broad, 1);
-		iterations--;
+		//iterations--;
 	}
 	semctl(semid, 0, IPC_RMID);
 	close(my_sock);
@@ -274,7 +274,7 @@ void* broad_thread_func(void* arg)
 			count = sendto(broad_sock, ans_msg, strlen(ans_msg), 0, (struct sockaddr*) &addr_broad_answer, addr_broad_len );
 			printf("Sent an answer %d\n", count);
 		}
-		iterations--;
+		//iterations--;
 	}
 	close(broad_sock);
 	return NULL;

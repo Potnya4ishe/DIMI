@@ -1,1 +1,60 @@
 Start logging by Global Logger
+LOG: Global Logger 17:53:31 === Lexer starts parsing ===
+LOG: Global Logger 17:53:31 Processing expression: int(x*x)
+
+LOG: Global Logger 17:53:31 Current symbol is i
+LOG: Global Logger 17:53:31 Lexer is recognizing id: int
+LOG: Global Logger 17:53:31 Recognized token: int
+LOG: Global Logger 17:53:31 Current symbol is (
+LOG: Global Logger 17:53:31 Lexer is recognizing service symbol: (
+LOG: Global Logger 17:53:31 Recognized token: (
+LOG: Global Logger 17:53:31 Current symbol is x
+LOG: Global Logger 17:53:31 Lexer is recognizing id: x
+LOG: Global Logger 17:53:31 Recognized token: x
+LOG: Global Logger 17:53:31 Current symbol is *
+LOG: Global Logger 17:53:31 Lexer is recognizing service symbol: *
+LOG: Global Logger 17:53:31 Recognized token: *
+LOG: Global Logger 17:53:31 Current symbol is x
+LOG: Global Logger 17:53:31 Lexer is recognizing id: x
+LOG: Global Logger 17:53:31 Recognized token: x
+LOG: Global Logger 17:53:31 Current symbol is )
+LOG: Global Logger 17:53:31 Lexer is recognizing service symbol: )
+LOG: Global Logger 17:53:31 Recognized token: )
+LOG: Global Logger 17:53:31 Current symbol is 
+
+WARNING: Global Logger 17:53:31 Couldn't recognize char: 
+
+LOG: Global Logger 17:53:31 Skipping unknown token...
+LOG: Global Logger 17:53:31 ===Lexer ends parsing===
+LOG: Global Logger 17:53:31 ===Token holder dump===
+LOG: Global Logger 17:53:31 int
+LOG: Global Logger 17:53:31 (
+LOG: Global Logger 17:53:31 x
+LOG: Global Logger 17:53:31 *
+LOG: Global Logger 17:53:31 x
+LOG: Global Logger 17:53:31 )
+LOG: Global Logger 17:53:31 
+LOG: Global Logger 17:53:31 ===End of dump===
+LOG: Global Logger 17:53:31 === Building AST ===
+LOG: Global Logger 17:53:31 Creating function node: int
+LOG: Global Logger 17:53:31 Skipping open bracket...
+LOG: Global Logger 17:53:31 Creating variable node: x
+LOG: Global Logger 17:53:31 Creating variable node: x
+LOG: Global Logger 17:53:31 Creating binary operator node...
+LOG: Global Logger 17:53:31 Skipping close bracket...
+LOG: Global Logger 17:53:31 === AST was created. Root is int
+LOG: Global Logger 17:53:31 Semantic checking...
+LOG: Global Logger 17:53:31 Binary operator*
+LOG: Global Logger 17:53:31 LHS:26335520
+LOG: Global Logger 17:53:31 RHS:26335552
+LOG: Global Logger 17:53:31 LHS addr:140734227468816
+LOG: Global Logger 17:53:31 RHS addr:140734227468832
+LOG: Global Logger 17:53:31 Binary operator*
+LOG: Global Logger 17:53:31 LHS:26335520
+LOG: Global Logger 17:53:31 RHS:26335552
+LOG: Global Logger 17:53:31 LHS addr:140734227468816
+LOG: Global Logger 17:53:31 RHS addr:140734227468832
+LOG: Global Logger 17:53:31 === AST DUMP ===
+LOG: Global Logger 17:53:31 int
+LOG: Global Logger 17:53:31 Root is int
+LOG: Global Logger 17:53:31 === DUMP END ===

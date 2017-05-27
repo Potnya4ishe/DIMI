@@ -112,17 +112,29 @@ int main( int argc, char** argv )
 			std::string subTreeStr = toStringRecursive(((Function*)root)->getArgument());
 			const char* tmpCharStr = subTreeStr.c_str();
 			strcpy(exprBuf, tmpCharStr);
+			gLogger.disableLog();
 			int_res = client_integrate(exprBuf, a, b);
 			//snprintf(result_string, MAXBUF, "%f", re);
+			gLogger.enableLog();
 			if (broken) {
 				strcpy(result_string, "No free servers!");
 			} else {
 				strcpy(result_string, std::to_string(int_res).c_str());
 			}
-		//} else if (FUNCTION == root->getNodeType()) {
-			
-		}
-		 else {
+		/*} else if (FUNCTION == root->getNodeType() &&
+			NUMBER == ((Function*)root)->getArgument()->getNodeType()) {
+			evaluate
+		}*/
+
+		}else if (FUNCTION == root->getNodeType() &&
+				NUMBER == ((Function*)root)->getArgument()->getNodeType()) {
+			IdValue idValue = TokenHolder::getSymbolValue(((Function*)root)->getName());
+			if (IdValue::TREE == idValue.getType()) {
+				printf("EVALUATE: %lg\n", evaluate(idValue.root(), ((Number*)((Function*)root)->getArgument())->getValue()));
+				strcpy(result_string, std::to_string(evaluate(idValue.root(), 
+					((Number*)((Function*)root)->getArgument())->getValue())).c_str());
+			}	
+		} else {
 			strcpy(result_string, toStringRecursive(root).c_str());
 		}
 

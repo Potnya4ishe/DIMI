@@ -39,13 +39,50 @@ typedef struct
 	char function[64];
 } serv_thread_data;
 
-
+/**
+ * @brief function-reaction on a received signal
+ * 
+ * @param signo is number of received signal
+ * 
+ * @return 0 on success
+ */
 void main_signal(int signo);
 
+
+/**
+ * @brief calculates the integral of the given fucntion via distributed calculations.
+ *		Looks for servers in the local network, divides the problem into equal 
+ *		parts and sends this data to the servers, which calculate their
+ * 		parts and send back the results.
+ * 
+ * @param function is the function to calculate the integral of
+ *
+ * @param a is the left end of the interval
+ *
+ * @param b is the right end of the interval
+ * 
+ * @return the value of the integral
+ */
 double client_integrate(char* function, double a, double b);
 
+
+/**
+ * @brief prepares the UDP-socket connection to be established. Via this socket
+ *		the broadcast will be send to find all available servers.
+ *
+ * 
+ * @return socket-id of prepared UDP-socket
+ */
 int prepare_UDP_socket();
 
+
+/**
+ * @brief prepares the message to be broadcasted and sends this message to the local network.
+ *
+ * @param broad_sock socket fd for the prepared UDP-socket
+ * 
+ * @return 0 on success
+ */
 int broad_cast(int broad_sock);
 
 int collect_answers(serv_st servers[MAX_NUMB_SERV], int broad_sock);

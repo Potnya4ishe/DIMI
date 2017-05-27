@@ -30,7 +30,7 @@ public:
 
 private:
 	bool isLogPossible(LogLevel lvl) const;
-
+	bool m_isLogEnable;
 
 	const char* m_name;
 	FILE* m_fileToDump;
