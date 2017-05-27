@@ -800,6 +800,18 @@ void ASTree::simplifyLiterals(ASTnode** node) {
 			double literalValue = ((Number*)opArg)->getValue();
 			recursiveDelete(*node);
 			*node = new Number(sin(literalValue));
+		} else if ("cos" == funcName && NUMBER == opArg->getNodeType()) {
+			double literalValue = ((Number*)opArg)->getValue();
+			recursiveDelete(*node);
+			*node = new Number(cos(literalValue));
+		} else if ("log" == funcName && NUMBER == opArg->getNodeType()) {
+			double literalValue = ((Number*)opArg)->getValue();
+			recursiveDelete(*node);
+			*node = new Number(log(literalValue));
+		} else if ("exp" == funcName && NUMBER == opArg->getNodeType()) {
+			double literalValue = ((Number*)opArg)->getValue();
+			recursiveDelete(*node);
+			*node = new Number(exp(literalValue));
 		}
 	}
 }

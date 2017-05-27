@@ -261,7 +261,7 @@ void* broad_thread_func(void* arg)
 		
 	semoper broading = { 0, -1, 0};
 	int iterations = 2;
-	while( iterations>0 )
+	while( iterations > 0 )
 	{
 		printf("Trying to start catching broadcasts...\n");
 		semop(semid,&broading,1);

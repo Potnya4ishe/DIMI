@@ -8,6 +8,8 @@ import time
 
 class ClientMenu(QWidget):
 
+
+
 	def __init__(self):
 		super(QWidget, self).__init__()
 		self.initUI()
@@ -61,17 +63,25 @@ class ClientMenu(QWidget):
 
 	def run(self):
 		#self.logOutput.clear()
-		file = open("expr.txt", "w")
-		file.write(self.exprToEval.text())
-		file.close()
-		time.sleep(10)
-		file = open("res.txt", "r");
-		string = file.read()
-		file.close()
-		self.logOutput.insertPlainText(string+'\n')
+		# file = open("expr.txt", "w")
+		# file.write(self.exprToEval.text())
+		# file.close()
+		# time.sleep(10)
+		# file = open("res.txt", "r");
+		# string = file.read()
+		# file.close()
+		# self.logOutput.insertPlainText(string+'\n')
+
+
+		self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.client.connect(('localhost', 9999))
+		print(self.client.send(bytes(self.exprToEval.text(), 'UTF-8')), 'bytes sent.')
+		time.sleep(0.2)
+		self.logOutput.insertPlainText(self.client.recv(1024).decode('UTF-8')+'\n')
 		
 
 	def stop(self):
+		self.client.send(bytes('666', 'UTF-8'))
 		self.proc.kill()
 		self.close()
 

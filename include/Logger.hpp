@@ -23,6 +23,9 @@ public:
 
 	void setLogLevel(LogLevel lvl);
 
+	void enableLog();
+	void disableLog();
+
 	~Logger();
 
 private:

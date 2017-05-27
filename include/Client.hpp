@@ -42,7 +42,7 @@ typedef struct
 
 void main_signal(int signo);
 
-int client_integrate(char* function, double a, double b);
+double client_integrate(char* function, double a, double b);
 
 int prepare_UDP_socket();
 

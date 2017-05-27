@@ -2,6 +2,17 @@
 #include "include/Interpreter.hpp"
 #include "include/Client.hpp"
 
+#include <stdio.h>
+#include <errno.h>
+#include <sys/socket.h>
+#include <resolv.h>
+#include <arpa/inet.h>
+#include <errno.h>
+
+#define MY_PORT		9999
+#define MAXBUF		1024
+
+
 //#define PRN_CASE(val) case val: printf("errno =" #val"\n"); gLogger.log(std::string("errno =" #val"\n");	break;
 #define PRN_CASE(val) case val: printf("errno =" #val"\n");	break;
 
@@ -14,6 +25,7 @@ int broken = 0;
 void main_signal(int signo)
 {
 	broken = 1;
+	printf("Got broken!\n");
 }
 
 
@@ -32,19 +44,66 @@ void prepare_signals() {
 
 int main( int argc, char** argv )
 {
-	char exprBuf[64];
-	char result_string[64];
- 	for(;;) {
- 		sleep(5);
-		memset(exprBuf, 0, 64);
-		FILE* sourceCode = fopen("expr.txt", "r");
-		ASSERT(nullptr != sourceCode);
-		//scanf("%s", exprBuf);
-		fscanf(sourceCode, "%s", exprBuf);
-		ASSERT(EOF != fclose(sourceCode));
+	int sockfd;
+	struct sockaddr_in self;
+
+  	if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
+		perror("Socket");
+		exit(errno);
+	}
+
+
+	/*---Initialize address/port structure---*/
+	bzero(&self, sizeof(self));
+	self.sin_family = AF_INET;
+	self.sin_port = htons(MY_PORT);
+	self.sin_addr.s_addr = INADDR_ANY;
+
+	/*---Assign a port number to the socket---*/
+    if ( bind(sockfd, (struct sockaddr*)&self, sizeof(self)) != 0 )
+	{
+		perror("socket--bind");
+		exit(errno);
+	}
+
+	/*---Make it a "listening socket"---*/
+	if ( listen(sockfd, 20) != 0 )
+	{
+		perror("socket--listen");
+		exit(errno);
+	}
+
+
+	char buffer[MAXBUF];
+	char exprBuf[MAXBUF];
+	char result_string[MAXBUF];
+	double int_res = 0.0;
+ 
+	for (;;) {
+
+		int clientfd;
+		struct sockaddr_in client_addr;
+		int addrlen=sizeof(client_addr);
+
+		/*---accept a connection (creating a data pipe)---*/
+		clientfd = accept(sockfd, (struct sockaddr*)&client_addr, (socklen_t*) &addrlen);
+		printf("%s:%d connected\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+
+		memset(result_string, 0, MAXBUF);
+		memset(exprBuf, 0, MAXBUF);
+
+		recv(clientfd, exprBuf, MAXBUF, 0);
+
+		printf("%s received\n", exprBuf);
+
+		if (!strcmp(exprBuf, "666")) {
+			break;
+		}
+
 		Interpreter interp;
 		ASTree* tree = interp.run(exprBuf);
 		ASTnode* root = (ASTnode*)tree->getRootNode();
+
 
 		if (FUNCTION == root->getNodeType() && 
 			"int" == ((Function*)root)->getName()) {
@@ -53,21 +112,47 @@ int main( int argc, char** argv )
 			std::string subTreeStr = toStringRecursive(((Function*)root)->getArgument());
 			const char* tmpCharStr = subTreeStr.c_str();
 			strcpy(exprBuf, tmpCharStr);
-			client_integrate(exprBuf, a, b);
+			int_res = client_integrate(exprBuf, a, b);
+			//snprintf(result_string, MAXBUF, "%f", re);
+			if (broken) {
+				strcpy(result_string, "No free servers!");
+			} else {
+				strcpy(result_string, std::to_string(int_res).c_str());
+			}
+		//} else if (FUNCTION == root->getNodeType()) {
+			
+		}
+		 else {
+			strcpy(result_string, toStringRecursive(root).c_str());
 		}
 
-		memset(result_string, 0, 64);
-		strcpy(result_string, toStringRecursive(root).c_str());
+		printf("Result: %s\n", result_string);
 
-		printf("%s\n", result_string);
+		send(clientfd, result_string, strlen(result_string), 0);
 
-		FILE* outCode = fopen("res.txt", "w");
-		ASSERT(nullptr != outCode);
-		fprintf(outCode, "%s", result_string);
-		ASSERT(EOF != fclose(outCode));
-	}
+		// FILE* outCode = fopen("res.txt", "w");
+		// ASSERT(nullptr != outCode);
+		// fprintf(outCode, "%s", result_string);
+		// ASSERT(EOF != fclose(outCode));
 
+	  
+			
+
+			
+
+		// 	/*---Echo back anything sent---*/
+		// 	send(clientfd, buffer, recv(clientfd, buffer, MAXBUF, 0), 0);
+
+		// 	/*---Close data connection---*/
+		close(clientfd);
+		}
+
+
+	/*---Clean up (should never get here!)---*/
+	close(sockfd);
+	return 0;
 }
+
 
 	
 
@@ -130,7 +215,7 @@ int collect_answers(serv_st servers[MAX_NUMB_SERV], int broad_sock) {
 	
 	//Делаем select -- смотрим, есть ли чего принять. Ждем три секунды. Если есть -- принимаем, если нет -- через 3 сек select выдаст 0
 	struct timeval wait_time;
-	wait_time.tv_sec = 3;
+	wait_time.tv_sec = 1;
 	wait_time.tv_usec = 0;
 	int current = 0;
 
@@ -189,12 +274,17 @@ double split_problem_and_solve(serv_st servers[MAX_NUMB_SERV], int current, doub
 	}
 	double total_result;
 	i = 0;
-	while(i<current && !broken)
+	while(i < current && !broken)
 	{
+		printf("Waiting to join %d\n", i);
 		pthread_join(tid[i], NULL);
+		printf("Joined %d\n", i);
 		total_result += *thread_data[i].result;
 		free(thread_data[i].result);
 		i++;
+	}
+	if (broken) {
+		printf("WUW! Broken!\n");
 	}
 	free(tid);
 	free(thread_data);
@@ -202,8 +292,12 @@ double split_problem_and_solve(serv_st servers[MAX_NUMB_SERV], int current, doub
 }
 
 
-int client_integrate(char* function, double a, double b) {
+double client_integrate(char* function, double a, double b) {
 	
+	broken = 0;
+
+	prepare_signals();
+
 	// Создание UDP сокета -- отправляем широковещательный пакет и принимаем ответ	
 	//Создаем сокет для отправки-приёма broadcast. Порт ставим любой. Биндим его
 	int broad_sock = prepare_UDP_socket();
@@ -217,6 +311,12 @@ int client_integrate(char* function, double a, double b) {
 
 	int current = collect_answers(servers, broad_sock);	
 
+	if (!current) {
+		printf("No free servers! Terminate!\n");
+		broken = 1;
+		return 0.0;
+	}
+
 
 	double total_result = split_problem_and_solve(servers, current, a, b, function);
 	
@@ -224,7 +324,7 @@ int client_integrate(char* function, double a, double b) {
 		printf("The result is %lf\n", total_result);	
 	else
 		printf("One server is broken! Terminated...\n");
-	return 0;	
+	return total_result;	
 }
 
 
@@ -298,6 +398,9 @@ void* work_with_server(void* arg_box)
 	{
 		printf("Broken server!!! Can't receive!\n");
 		kill(thread_data->pid, SIGUSR1);
+		close(serv_sock);
+		printf("Closing!\n");
+		//return NULL;
 		pthread_exit(PTHREAD_CANCELED);
 	}
 	//double res = *(thread_data->result);
